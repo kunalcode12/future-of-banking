@@ -11,6 +11,7 @@ import Button from "../components/Button";
 import { Input } from "../components/UI/Input";
 import { Lock, Home, Calculator, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function CompanyTokenizationPage() {
   const [loanAmount, setLoanAmount] = useState(100000);

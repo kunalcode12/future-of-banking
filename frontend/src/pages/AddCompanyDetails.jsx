@@ -19,6 +19,8 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setValue } from "@/store/data";
 
 export default function HomeLoanApplication() {
   const navigate = useNavigate();
@@ -35,6 +37,7 @@ export default function HomeLoanApplication() {
     annualIncome: "",
     loanAmount: "",
   });
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,6 +58,7 @@ export default function HomeLoanApplication() {
     e.preventDefault();
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    dispatch(setValue(formData));
     navigate("/asset-uploading", {
       state: { formData },
     });

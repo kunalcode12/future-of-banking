@@ -9,7 +9,7 @@ export default function AssetUpload() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const formData = location.state?.formData;
+  const formData1 = location.state?.formData || {};
 
   const addAsset = () => {
     setAssets([...assets, { type: "", file: null }]);
@@ -27,7 +27,10 @@ export default function AssetUpload() {
     setTimeout(() => {
       setIsLoading(false);
       navigate("/tokenization-success", {
-        state: formData,
+        state: {
+          ...formData1,
+          assets: assets,
+        },
       });
     }, 2000);
   };
@@ -52,7 +55,12 @@ export default function AssetUpload() {
               <Plus size={24} />
             </button>
           </div>
-          <div className="w-full h-40 border-2 border-white border-dashed rounded-md flex items-center justify-center cursor-pointer">
+          <div
+            className="w-full h-40 border-2 border-white border-dashed rounded-md flex items-center justify-center cursor-pointer"
+            onClick={() =>
+              document.getElementById(`file-upload-${index}`).click()
+            }
+          >
             <input
               type="file"
               onChange={(e) =>
@@ -61,12 +69,18 @@ export default function AssetUpload() {
               className="hidden"
               id={`file-upload-${index}`}
             />
-            <label
-              htmlFor={`file-upload-${index}`}
-              className="text-xl cursor-pointer"
-            >
-              {asset.file ? asset.file.name : "Click to upload asset file"}
-            </label>
+            <div className="text-xl text-center">
+              {asset.file ? (
+                <div>
+                  <p>{asset.file.name}</p>
+                  <p className="text-sm text-gray-400">
+                    {(asset.file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              ) : (
+                "Click to upload asset file"
+              )}
+            </div>
           </div>
         </div>
       ))}

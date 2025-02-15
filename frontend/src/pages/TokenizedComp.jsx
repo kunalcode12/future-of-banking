@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home as HomeIcon, CheckCircle, Lock, Sparkles } from "lucide-react";
+import { Home as HomeIcon, CheckCircle, Lock, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,15 +8,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { useSelector } from "react-redux";
+import { useState } from "react";
 
 export default function HomeLoanTokenizationSuccess() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const formData = location.state?.formData || {
+  const location = useLocation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const assetData = location.state?.assets || [
+    { id: 1, name: "Property Document 1", type: "document" },
+    { id: 2, name: "Property Document 2", type: "document" },
+    { id: 3, name: "Property Image 1", type: "image" },
+  ];
+
+  // Hardcoded asset values
+  const assetValues = [
+    { id: 1, value: 100000 },
+    { id: 2, value: 120000 },
+    { id: 3, value: 80000 },
+  ];
+
+  const data = useSelector((state) => state.auth.value);
+  const formData = data || {
     fullName: "N/A",
     loanAmount: "N/A",
   };
-  console.log(formData);
 
   // Generate token ID based on random values
   const tokenId = `TKN-${Math.floor(Math.random() * 1000000)
@@ -25,12 +49,16 @@ export default function HomeLoanTokenizationSuccess() {
 
   const handleGoToDashboard = () => {
     navigate("/dashboard", {
-      state: { formData, tokenId },
+      state: { data, tokenId, totalAssetValue },
     });
   };
 
   const handleGoHome = () => {
     navigate("/");
+  };
+
+  const handleViewAssets = () => {
+    setIsDialogOpen(true);
   };
 
   // Function to format currency values
@@ -45,6 +73,12 @@ export default function HomeLoanTokenizationSuccess() {
       maximumFractionDigits: 0,
     }).format(numericValue);
   };
+
+  // Calculate total asset value
+  const totalAssetValue = assetValues.reduce(
+    (sum, asset) => sum + asset.value,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -121,7 +155,7 @@ export default function HomeLoanTokenizationSuccess() {
               <p className="flex justify-between items-center">
                 <span className="text-white text-opacity-70">Asset Value:</span>
                 <span className="font-medium text-green-400">
-                  {formatCurrency(formData.loanAmount)}
+                  {formatCurrency(totalAssetValue)}
                 </span>
               </p>
 
@@ -139,7 +173,7 @@ export default function HomeLoanTokenizationSuccess() {
         <CardFooter className="flex flex-col items-center pt-8 pb-12 space-y-6">
           <Button
             className="w-full max-w-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-5 px-10 rounded-2xl text-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-            onClick={handleGoToDashboard}
+            onClick={handleViewAssets}
           >
             View Your Assets
           </Button>
@@ -150,6 +184,76 @@ export default function HomeLoanTokenizationSuccess() {
           </p>
         </CardFooter>
       </Card>
+
+      {/* Asset Preview Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-4xl bg-gray-900 border border-white border-opacity-10 text-white p-0 rounded-2xl shadow-2xl">
+          <DialogHeader className="p-6 border-b border-white border-opacity-10">
+            <div className="flex items-center justify-between w-full">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                Your Tokenized Assets
+              </DialogTitle>
+              <DialogClose className="w-8 h-8 rounded-full bg-white bg-opacity-10 flex items-center justify-center hover:bg-opacity-20 transition-all">
+                <X className="w-5 h-5" />
+              </DialogClose>
+            </div>
+          </DialogHeader>
+          <div className="p-6 space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {assetData.map((asset, index) => (
+                <div
+                  key={asset.id}
+                  className="bg-white bg-opacity-5 rounded-xl overflow-hidden border border-white border-opacity-10 transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                  <div className="h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                    {asset.type === "image" ? (
+                      <img
+                        src="/api/placeholder/300/200"
+                        alt={asset.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center p-4">
+                        <Lock className="w-12 h-12 mx-auto mb-2 text-white" />
+                        <p className="text-white font-medium">{asset.name}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-2">{asset.name}</h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-white text-opacity-70">Value:</span>
+                      <span className="font-bold text-green-400">
+                        {formatCurrency(assetValues[index]?.value)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-white border-opacity-10">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-medium text-white text-opacity-80">
+                  Total Asset Value:
+                </span>
+                <span className="text-2xl font-bold text-green-400">
+                  {formatCurrency(totalAssetValue)}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
