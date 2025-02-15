@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.98.0",
     "@tailwindcss/vite": "^4.0.6",
+    "buffer": "^6.0.3",
     "framer-motion": "^12.4.3",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
