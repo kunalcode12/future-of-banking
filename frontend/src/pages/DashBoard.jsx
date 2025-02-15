@@ -8,7 +8,7 @@ import {
   CardFooter,
 } from "../components/UI/CustomCard";
 import Button from "../components/Button";
-import Input from "../components/UI/Input";
+import { Input } from "../components/UI/Input";
 import { Lock, Home, Calculator, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 

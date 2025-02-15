@@ -22,6 +22,7 @@ import {
   X,
   Menu,
 } from "lucide-react";
+import AssetUpload from "./pages/AssetUploading";
 
 function App() {
   const [showSignIn, setShowSignIn] = useState(false);
@@ -247,6 +248,10 @@ function App() {
         <Route
           path="/company-details"
           element={user ? <AddCompanyDocuments /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/asset-uploading"
+          element={user ? <AssetUpload /> : <Navigate to="/" replace />}
         />
         <Route
           path="/tokenization-success"

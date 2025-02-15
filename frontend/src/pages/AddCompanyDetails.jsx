@@ -1,307 +1,280 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/UI/input";
+import Label from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Calendar } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 
-export default function AddCompanyDocuments() {
-  const location = useLocation();
+export default function HomeLoanApplication() {
   const navigate = useNavigate();
-  const { companyId } = location.state || { companyId: "N/A" };
+  const [loading, setLoading] = useState(false);
+  const [date, setDate] = useState();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    panNumber: "",
+    aadharNumber: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    employmentType: "",
+    annualIncome: "",
+    loanAmount: "",
+  });
 
-  const [companyName, setCompanyName] = useState("");
-  const [companyValuation, setCompanyValuation] = useState("");
-  const [companyGST, setCompanyGST] = useState("");
-  const [invoiceFileName, setInvoiceFileName] = useState("No file chosen");
-  const [noObjectionFileName, setNoObjectionFileName] =
-    useState("No file chosen");
-
-  const handleFileChange = (event, setFileName) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-    } else {
-      setFileName("No file chosen");
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSelectChange = (value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
-    navigate("/tokenization-success", {
-      state: {
-        companyId,
-        companyName,
-        companyValuation,
-        companyGST,
-      },
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    navigate("/asset-uploading", {
+      state: { formData },
     });
   };
 
-  const buttonStyle = {
-    cursor: "pointer",
-    backgroundColor: "#3b82f6",
-    color: "white",
-    fontWeight: "bold",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    border: "none",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "8px 12px",
-    border: "1px solid #d1d5db",
-    borderRadius: "4px",
-    marginTop: "4px",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(to bottom right, #dbeafe, #e0e7ff)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "48px 16px",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "42rem",
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          borderRadius: "16px",
-          padding: "32px",
-          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "1.875rem",
-            fontWeight: "bold",
-            textAlign: "center",
-            color: "#1f2937",
-            marginBottom: "8px",
-          }}
-        >
-          Add Company Documents
+    <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-5xl font-bold text-center mb-16 tracking-tight">
+          Home Loan Application
         </h1>
-        <p
-          style={{
-            textAlign: "center",
-            color: "#4b5563",
-            marginBottom: "24px",
-          }}
-        >
-          Please fill in the details and upload required documents
-        </p>
-
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "24px" }}
-        >
-          <div>
-            <label
-              htmlFor="companyName"
-              style={{
-                color: "#374151",
-                display: "block",
-                marginBottom: "4px",
-              }}
-            >
-              Company Name
-            </label>
-            <input
-              id="companyName"
-              type="text"
-              required
-              style={inputStyle}
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="companyValuation"
-              style={{
-                color: "#374151",
-                display: "block",
-                marginBottom: "4px",
-              }}
-            >
-              Company Valuation
-            </label>
-            <input
-              id="companyValuation"
-              type="number"
-              required
-              style={inputStyle}
-              value={companyValuation}
-              onChange={(e) => setCompanyValuation(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="companyGST"
-              style={{
-                color: "#374151",
-                display: "block",
-                marginBottom: "4px",
-              }}
-            >
-              Company GST Number
-            </label>
-            <input
-              id="companyGST"
-              type="text"
-              required
-              style={inputStyle}
-              value={companyGST}
-              onChange={(e) => setCompanyGST(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="invoiceImage"
-              style={{
-                color: "#374151",
-                display: "block",
-                marginBottom: "4px",
-              }}
-            >
-              Invoice Image
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <label htmlFor="invoiceImage" style={buttonStyle}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ marginRight: "8px" }}
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                Choose File
-              </label>
-              <span style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                {invoiceFileName}
-              </span>
-              <input
-                id="invoiceImage"
-                type="file"
-                accept="image/*"
-                required
-                style={{ display: "none" }}
-                onChange={(e) => handleFileChange(e, setInvoiceFileName)}
-              />
+        <form onSubmit={handleSubmit} className="space-y-12">
+          <div className="bg-white bg-opacity-5 p-10 rounded-2xl backdrop-blur-sm border border-white border-opacity-10">
+            <h2 className="text-3xl font-semibold mb-8 text-white">
+              Personal Information
+            </h2>
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+              <div className="space-y-3">
+                <Label htmlFor="fullName" className="text-xl text-white">
+                  Full Name
+                </Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="dateOfBirth" className="text-xl text-white">
+                  Date of Birth
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "h-14 w-full justify-start text-left font-normal bg-white bg-opacity-10 border-white border-opacity-20 hover:bg-white hover:bg-opacity-20 text-white text-xl",
+                        !date && "text-white text-opacity-50"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-5 w-5" />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-black border-white border-opacity-20">
+                    <CalendarComponent
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                      className="bg-black text-white"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="panNumber" className="text-xl text-white">
+                  PAN Number
+                </Label>
+                <Input
+                  id="panNumber"
+                  name="panNumber"
+                  type="text"
+                  required
+                  value={formData.panNumber}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="ABCDE1234F"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="aadharNumber" className="text-xl text-white">
+                  Aadhar Number
+                </Label>
+                <Input
+                  id="aadharNumber"
+                  name="aadharNumber"
+                  type="text"
+                  required
+                  value={formData.aadharNumber}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="1234 5678 9012"
+                />
+              </div>
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="noObjectionImage"
-              style={{
-                color: "#374151",
-                display: "block",
-                marginBottom: "4px",
-              }}
-            >
-              No Objection Certificate Image
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <label htmlFor="noObjectionImage" style={buttonStyle}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ marginRight: "8px" }}
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                Choose File
-              </label>
-              <span style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                {noObjectionFileName}
-              </span>
-              <input
-                id="noObjectionImage"
-                type="file"
-                accept="image/*"
-                required
-                style={{ display: "none" }}
-                onChange={(e) => handleFileChange(e, setNoObjectionFileName)}
-              />
+          <div className="bg-white bg-opacity-5 p-10 rounded-2xl backdrop-blur-sm border border-white border-opacity-10">
+            <h2 className="text-3xl font-semibold mb-8 text-white">
+              Contact Information
+            </h2>
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-xl text-white">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="johndoe@example.com"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="phoneNumber" className="text-xl text-white">
+                  Phone Number
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  required
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+              <div className="sm:col-span-2 space-y-3">
+                <Label htmlFor="address" className="text-xl text-white">
+                  Current Address
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
+                  type="text"
+                  required
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="123 Main St, City, State, ZIP"
+                />
+              </div>
             </div>
           </div>
 
-          <button
-            type="submit"
-            style={{
-              ...buttonStyle,
-              width: "100%",
-              padding: "12px",
-              background: "linear-gradient(to right, #2563eb, #4f46e5)",
-            }}
-          >
-            Add Company Details
-          </button>
+          <div className="bg-white bg-opacity-5 p-10 rounded-2xl backdrop-blur-sm border border-white border-opacity-10">
+            <h2 className="text-3xl font-semibold mb-8 text-white">
+              Financial Information
+            </h2>
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+              <div className="space-y-3">
+                <Label htmlFor="employmentType" className="text-xl text-white">
+                  Employment Type
+                </Label>
+                <Select
+                  onValueChange={(value) =>
+                    handleSelectChange("employmentType", value)
+                  }
+                >
+                  <SelectTrigger className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 text-white">
+                    <SelectValue placeholder="Select employment type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-black border-white border-opacity-20 text-white">
+                    <SelectItem value="salaried">Salaried</SelectItem>
+                    <SelectItem value="self-employed">Self-employed</SelectItem>
+                    <SelectItem value="business">Business Owner</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="annualIncome" className="text-xl text-white">
+                  Annual Income
+                </Label>
+                <Input
+                  id="annualIncome"
+                  name="annualIncome"
+                  type="number"
+                  required
+                  value={formData.annualIncome}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="100000"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="loanAmount" className="text-xl text-white">
+                  Desired Loan Amount
+                </Label>
+                <Input
+                  id="loanAmount"
+                  name="loanAmount"
+                  type="number"
+                  required
+                  value={formData.loanAmount}
+                  onChange={handleChange}
+                  className="h-14 text-xl bg-white bg-opacity-10 border-white border-opacity-20 focus:border-white focus:border-opacity-50 text-white placeholder-white placeholder-opacity-50"
+                  placeholder="500000"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full sm:w-auto text-2xl py-8 px-16 bg-white text-black hover:bg-white hover:bg-opacity-90 transition-all duration-200"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                  Processing
+                </>
+              ) : (
+                "Submit Application"
+              )}
+            </Button>
+          </div>
         </form>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "24px",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "0.875rem",
-              color: "#6b7280",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ marginRight: "4px" }}
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            Secured by Finternet
-          </p>
-        </div>
       </div>
     </div>
   );
