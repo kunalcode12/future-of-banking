@@ -31,6 +31,8 @@ export default function BankOfferDetails({ onBack }) {
     tenure: "60 months",
   };
 
+  console.log(bankDetails);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">

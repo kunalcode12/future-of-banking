@@ -1,272 +1,294 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "../components/UI/CustomCard";
-import Button from "../components/Button";
-import { Input } from "../components/UI/Input";
-import { Lock, Home, Calculator, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Home as HomeIcon, Building, Key, User, Lock } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
-export default function CompanyTokenizationPage() {
-  const [loanAmount, setLoanAmount] = useState(100000);
-  const [interestRate, setInterestRate] = useState(5);
-  const [loanTerm, setLoanTerm] = useState(12);
-  const [showPopup, setShowPopup] = useState(false);
-  const [selectedDocuments, setSelectedDocuments] = useState([]);
-
+export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const companyDetails = location.state || {
-    companyName: "N/A",
-    companyGST: "N/A",
-    companyValuation: "N/A",
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+
+  const { data, tokenId, totalAssetValue } = location.state || {};
+  const userData = data || { fullName: "N/A", loanAmount: "N/A" };
+
+  const interestRate = 8.5;
+  const loanTerm = 20;
+  const monthlyPayment = calculateMonthlyPayment(
+    totalAssetValue || 0,
+    interestRate,
+    loanTerm
+  );
+
+  function calculateMonthlyPayment(principal, rate, years) {
+    if (!principal || isNaN(principal)) return 0;
+
+    const p = parseFloat(principal);
+    const r = rate / 100 / 12;
+    const n = years * 12;
+
+    if (p <= 0 || r <= 0 || n <= 0) return 0;
+
+    const monthlyPayment =
+      (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    return monthlyPayment;
+  }
+
+  const formatCurrency = (value) => {
+    if (!value) return "N/A";
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return value;
+
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(numericValue);
   };
 
-  const calculateEMI = () => {
-    const r = interestRate / 12 / 100;
-    const n = loanTerm;
-    const emi =
-      (loanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    return emi.toFixed(2);
+  const handleGoHome = () => {
+    navigate("/");
   };
 
-  const handleGoToDashboard = () => {
-    setShowPopup(true);
+  const handleViewLoanOffers = () => {
+    navigate("/banks");
   };
 
-  const handleClosePopup = () => {
-    setShowPopup(false);
+  const handleMakePayment = () => {
+    setIsPaymentDialogOpen(true);
   };
-
-  const handleDocumentToggle = (document) => {
-    setSelectedDocuments((prev) =>
-      prev.includes(document)
-        ? prev.filter((doc) => doc !== document)
-        : [...prev, document]
-    );
-  };
-
-  const handleViewOffers = () => {
-    navigate("/banks", {
-      state: {
-        companyName: companyDetails.companyName,
-        companyValuation: companyDetails.companyValuation,
-      },
-    });
-  };
-
-  const documents = [
-    "Ownership Certificate",
-    "Valuation",
-    "No Objection Certificate",
-    "Personal Details",
-  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-4xl"
-      >
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            <Home className="inline mr-2" />
-            Home
-          </h1>
-        </header>
+    <div className="min-h-screen bg-black text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-blue-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"></div>
+        <div
+          className="absolute bottom-0 right-1/4 w-64 h-64 bg-indigo-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+      </div>
 
-        <motion.h2
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-4xl font-extrabold text-center text-gray-900 mb-8"
-        >
-          Your Verified Company
-        </motion.h2>
+      {/* Top Navbar */}
+      <nav className="w-full bg-white bg-opacity-5 backdrop-blur-sm fixed top-0 left-0 z-50 border-b border-white border-opacity-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16 space-x-4">
+            <div
+              className="flex items-center space-x-1 cursor-pointer"
+              onClick={handleGoHome}
+            >
+              <HomeIcon className="w-5 h-5 text-white" />
+              <span className="text-lg font-medium text-white hover:text-white hover:opacity-80 transition duration-200">
+                Home
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <User className="w-5 h-5 text-blue-400" />
+              <span className="text-lg font-medium text-white">
+                {userData.fullName}
+              </span>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
-          <Card className="w-full bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden">
-            <CardContent className="p-6">
-              <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                <h3 className="text-2xl font-semibold text-gray-700 mb-4">
-                  Receipt
-                </h3>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                  className="space-y-3"
-                >
-                  <div className="space-y-4 text-lg">
-                    <p className="flex justify-between">
-                      <span className="text-gray-600">Company ID:</span>
-                      <span className="font-medium">
-                        {companyDetails.companyId}
-                      </span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="text-gray-600">Company Name:</span>
-                      <span className="font-medium">
-                        {companyDetails.companyName}
-                      </span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="text-gray-600">Company GST Number:</span>
-                      <span className="font-medium">
-                        {companyDetails.companyGST}
-                      </span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="text-gray-600">Company Valuation:</span>
-                      <span className="font-medium">
-                        ${companyDetails.companyValuation}
-                      </span>
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col items-center pt-6 space-y-4 bg-gray-50">
-              <Button
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-                onClick={handleGoToDashboard}
-              >
-                Request Loan
-              </Button>
-            </CardFooter>
-          </Card>
-        </motion.div>
+      <div className="max-w-7xl mx-auto mt-20 space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 flex items-center">
+              <Building className="w-6 h-6 mr-2 text-blue-400" />
+              Home Loan Dashboard
+            </h1>
+            <p className="text-white text-opacity-70">
+              Manage your tokenized property and loan details
+            </p>
+          </div>
+          <div className="flex space-x-4">
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-lg text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+              onClick={handleViewLoanOffers}
+            >
+              View Loan Offers
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 px-6 rounded-lg text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+              onClick={handleMakePayment}
+            >
+              Pay EMI
+            </Button>
+          </div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.5 }}
-          className="mt-12"
-        >
-          <Card className="w-full bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white py-6">
-              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center">
-                <Calculator className="mr-2" />
-                EMI Calculator
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Property & Loan Summary Card */}
+          <Card className="bg-white bg-opacity-5 backdrop-blur-sm border border-white border-opacity-10 shadow-xl rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
+            <CardHeader className="bg-gradient-to-r from-blue-900 to-indigo-900 bg-opacity-50">
+              <CardTitle className="flex items-center text-xl font-bold">
+                <Building className="w-5 h-5 mr-2 text-blue-400" />
+                Property & Loan Details
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Loan Amount
-                  </label>
-                  <Input
-                    type="number"
-                    value={loanAmount}
-                    onChange={(e) => setLoanAmount(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Interest Rate (%)
-                  </label>
-                  <Input
-                    type="number"
-                    value={interestRate}
-                    onChange={(e) => setInterestRate(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Loan Term (months)
-                  </label>
-                  <Input
-                    type="number"
-                    value={loanTerm}
-                    onChange={(e) => setLoanTerm(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-              <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-                <p className="text-xl font-semibold text-center">
-                  Estimated Monthly EMI: ${calculateEMI()}
+            <CardContent className="pt-6 space-y-4">
+              <div className="space-y-2">
+                <p className="flex justify-between">
+                  <span className="text-white text-opacity-70">Token ID:</span>
+                  <span className="font-medium text-white">
+                    {tokenId || "N/A"}
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-white text-opacity-70">
+                    Loan Amount:
+                  </span>
+                  <span className="font-medium text-white">
+                    {formatCurrency(totalAssetValue)}
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-white text-opacity-70">
+                    Interest Rate:
+                  </span>
+                  <span className="font-medium text-white">
+                    {interestRate}%
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-white text-opacity-70">
+                    Loan Tenure:
+                  </span>
+                  <span className="font-medium text-white">
+                    {loanTerm} years
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-white text-opacity-70">
+                    Monthly EMI:
+                  </span>
+                  <span className="font-medium text-green-400">
+                    {formatCurrency(monthlyPayment)}
+                  </span>
                 </p>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
-          className="mt-12 text-center"
-        >
-          <p className="text-sm text-gray-600 flex items-center justify-center">
+          {/* Property Token Information Card */}
+          <Card className="bg-white bg-opacity-5 backdrop-blur-sm border border-white border-opacity-10 shadow-xl rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 col-span-2">
+            <CardHeader className="bg-gradient-to-r from-blue-900 to-indigo-900 bg-opacity-50">
+              <CardTitle className="flex items-center text-xl font-bold">
+                <Key className="w-5 h-5 mr-2 text-blue-400" />
+                Property Token Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <p className="flex justify-between">
+                    <span className="text-white text-opacity-70">
+                      Token Status:
+                    </span>
+                    <span className="font-medium text-green-400">Active</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-white text-opacity-70">
+                      Tokenized On:
+                    </span>
+                    <span className="font-medium text-white">
+                      {new Date().toLocaleDateString()}
+                    </span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-white text-opacity-70">
+                      Blockchain:
+                    </span>
+                    <span className="font-medium text-white">
+                      Secure Property Chain
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-opacity-20 rounded-xl p-6">
+                <h3 className="text-lg font-bold mb-2">Security Features</h3>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center">
+                    <Lock className="w-4 h-4 mr-2 text-blue-400" />
+                    256-bit encryption
+                  </li>
+                  <li className="flex items-center">
+                    <Lock className="w-4 h-4 mr-2 text-blue-400" />
+                    Immutable blockchain record
+                  </li>
+                  <li className="flex items-center">
+                    <Lock className="w-4 h-4 mr-2 text-blue-400" />
+                    Smart contract protection
+                  </li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-12 text-center">
+          <p className="text-sm text-white text-opacity-70 flex items-center justify-center">
             <Lock className="w-4 h-4 mr-1" />
-            Secured by Finternet
+            Your home loan documents are secured by advanced blockchain
+            technology
           </p>
-        </motion.footer>
-      </motion.div>
+        </footer>
+      </div>
 
-      <AnimatePresence>
-        {showPopup && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg p-6 w-full max-w-md"
+      {/* EMI Payment Dialog */}
+      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <DialogContent className="bg-gray-900 border border-white border-opacity-10 text-white p-0 rounded-2xl shadow-2xl max-w-md">
+          <DialogHeader className="p-6 border-b border-white border-opacity-10">
+            <div className="flex items-center justify-between w-full">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                Pay Home Loan EMI
+              </DialogTitle>
+              <DialogClose className="w-8 h-8 rounded-full bg-white bg-opacity-10 flex items-center justify-center hover:bg-opacity-20 transition-all">
+                <Lock className="w-5 h-5" />
+              </DialogClose>
+            </div>
+          </DialogHeader>
+          <div className="p-6 space-y-6">
+            <div className="bg-white bg-opacity-5 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-white text-opacity-70">EMI Amount:</span>
+                <span className="text-xl font-bold text-white">
+                  {formatCurrency(monthlyPayment)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white text-opacity-70">Status:</span>
+                <span className="font-medium text-yellow-400">Pending</span>
+              </div>
+            </div>
+            <div className="text-center px-4">
+              <p className="text-sm text-white text-opacity-70">
+                Your EMI payment will be processed securely. A digital receipt
+                will be generated and added to your property's blockchain
+                record.
+              </p>
+            </div>
+            <Button
+              className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-3 rounded-xl text-lg transition-all duration-300"
+              onClick={() => setIsPaymentDialogOpen(false)}
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Share Company Documents</h3>
-                <button
-                  onClick={handleClosePopup}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <div className="space-y-2">
-                {documents.map((doc) => (
-                  <div key={doc} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={doc}
-                      checked={selectedDocuments.includes(doc)}
-                      onChange={() => handleDocumentToggle(doc)}
-                      className="mr-2"
-                    />
-                    <label htmlFor={doc}>{doc}</label>
-                  </div>
-                ))}
-              </div>
-              <Button
-                onClick={handleViewOffers}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
-              >
-                View Offers
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              Confirm EMI Payment
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

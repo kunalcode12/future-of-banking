@@ -15,12 +15,14 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
+import { setTotalAsset } from "@/store/data";
 
 export default function HomeLoanTokenizationSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const assetData = location.state?.assets || [
@@ -48,6 +50,7 @@ export default function HomeLoanTokenizationSuccess() {
     .padStart(6, "0")}`;
 
   const handleGoToDashboard = () => {
+    dispatch(setTotalAsset(totalAssetValue));
     navigate("/dashboard", {
       state: { data, tokenId, totalAssetValue },
     });

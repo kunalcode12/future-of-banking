@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, Building2, Landmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const banks = [
   {
@@ -58,11 +59,13 @@ const banks = [
 export default function SelectOfferPage() {
   const [selectedBank, setSelectedBank] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
+  const data = useSelector((state) => state.auth.value);
+  const asset = useSelector((state) => state.auth.totalAsset);
 
-  const companyDetails = location.state || {
-    companyName: "N/A",
-    companyValuation: "N/A",
+  const companyDetails = {
+    companyName: data.fullName || "N/A",
+    companyValuation: asset || "N/A",
   };
 
   const handleBankSelect = (bank) => {
